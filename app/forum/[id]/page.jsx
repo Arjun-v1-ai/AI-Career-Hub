@@ -32,6 +32,7 @@ export default function PostDetail({ params }) {
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyContent, setReplyContent] = useState("");
+  const [expandedComments, setExpandedComments] = useState({}); // Move this here
 
   const flairs = [
     { value: "career-discussion", label: "Career Discussion" },
@@ -336,7 +337,6 @@ export default function PostDetail({ params }) {
 
   // Recursive function to render comments and their replies
   // Add this to your state variables at the top of the component
-  const [expandedComments, setExpandedComments] = useState({});
 
   // Add this function to toggle comment expansion
   const toggleCommentExpansion = (commentId) => {
