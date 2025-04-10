@@ -55,6 +55,7 @@ export default function PostDetail({ params }) {
       }
 
       const data = await response.json();
+      console.log("Fetched post data:", data); // Add this for debugging
       setPost(data.post);
     } catch (err) {
       console.error("Error fetching post:", err);

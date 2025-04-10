@@ -273,6 +273,11 @@ const mongooseCommentSchema = new Schema(
       ref: "User",
       required: [true, "Comment author is required"],
     },
+    parentCommentId: {
+      type: Schema.Types.ObjectId,
+      ref: "Comment",
+      default: null,
+    },
     likes: [
       {
         type: Schema.Types.ObjectId,
@@ -285,11 +290,34 @@ const mongooseCommentSchema = new Schema(
         ref: "Comment",
       },
     ],
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+// Add a pre-remove hook to handle cascading deletion of replies
+mongooseCommentSchema.pre("remove", async function (next) {
+  try {
+    // Find all replies to this comment
+    const replies = await this.model("Comment").find({
+      parentCommentId: this._id,
+    });
+
+    // Remove each reply
+    for (const reply of replies) {
+      await reply.remove();
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 // New Mongoose Schema for Posts
 const mongoosePostSchema = new Schema(

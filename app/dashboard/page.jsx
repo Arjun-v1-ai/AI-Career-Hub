@@ -497,33 +497,60 @@ export default function Dashboard() {
           {/* Community Forum Section */}
           {activeTab === "forum" && (
             <div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <DashboardCard
-                  title="Community Forum"
-                  description="Join discussions, share experiences, and learn from others in the community."
-                  icon={
-                    <MessageCircle className="h-8 w-8 text-primary-start" />
-                  }
-                  onClick={() => handleCardClick("/forum")}
-                />
-                <DashboardCard
-                  title="Share Your Success"
-                  description="Tell your story about how AI Career Hub helped you land your dream job."
-                  icon={<TrendingUp className="h-8 w-8 text-primary-start" />}
-                  onClick={() =>
-                    handleCardClick("/forum/create?flair=success-story")
-                  }
-                />
-                <DashboardCard
-                  title="Interview Experiences"
-                  description="Share or read about real interview experiences from other community members."
-                  icon={
-                    <MessageSquare className="h-8 w-8 text-primary-start" />
-                  }
-                  onClick={() =>
-                    handleCardClick("/forum?flair=interview-experience")
-                  }
-                />
+              <div className="bg-[#161B22] p-6 rounded-lg shadow-md relative overflow-hidden mb-8">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#E31D65] to-[#FF6B2B] opacity-10 rounded-bl-full"></div>
+
+                <h2 className="text-2xl font-semibold text-white mb-6">
+                  Community Forum
+                </h2>
+                <p className="text-gray-400 mb-6">
+                  Connect with other professionals, share your experiences, and
+                  learn from the community.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div
+                    className="bg-[#1F2937] p-5 rounded-lg hover:bg-[#2D3748] transition-colors cursor-pointer"
+                    onClick={() => handleCardClick("/forum")}
+                  >
+                    <div className="flex items-center mb-3">
+                      <MessageCircle className="h-6 w-6 text-[#E31D65] mr-3" />
+                      <h3 className="text-lg font-medium text-white">
+                        Browse Discussions
+                      </h3>
+                    </div>
+                    <p className="text-gray-400 text-sm">
+                      Explore topics from career advice to interview experiences
+                      shared by the community.
+                    </p>
+                  </div>
+
+                  <div
+                    className="bg-[#1F2937] p-5 rounded-lg hover:bg-[#2D3748] transition-colors cursor-pointer"
+                    onClick={() => handleCardClick("/forum/create")}
+                  >
+                    <div className="flex items-center mb-3">
+                      <Edit className="h-6 w-6 text-[#E31D65] mr-3" />
+                      <h3 className="text-lg font-medium text-white">
+                        Create a Post
+                      </h3>
+                    </div>
+                    <p className="text-gray-400 text-sm">
+                      Share your experiences, ask questions, or start a
+                      discussion with the community.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <button
+                    onClick={() => handleCardClick("/forum")}
+                    className="w-full px-4 py-3 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90 flex items-center justify-center"
+                  >
+                    <MessageCircle className="h-5 w-5 mr-2" />
+                    Go to Community Forum
+                  </button>
+                </div>
               </div>
             </div>
           )}
