@@ -18,6 +18,7 @@ import {
   PlayCircle,
   Linkedin,
   Trash2, // Adding the trash icon
+  MessageCircle, // Adding message circle icon for forum
 } from "lucide-react";
 import { ProtectedRoute } from "@/services/routeProtectionService";
 import ChatbotController from "@/components/ChatbotController";
@@ -247,6 +248,12 @@ export default function Dashboard() {
               icon={<Users className="h-5 w-5 mr-2" />}
               isActive={activeTab === "find-mentor"}
               onClick={() => handleTabClick("find-mentor")}
+            />
+            <TabButton
+              label="Community Forum"
+              icon={<MessageCircle className="h-5 w-5 mr-2" />}
+              isActive={activeTab === "forum"}
+              onClick={() => handleTabClick("forum")}
             />
           </div>
 
@@ -482,6 +489,40 @@ export default function Dashboard() {
                   description="Connect with experienced professionals in your field."
                   icon={<Users className="h-8 w-8 text-primary-start" />}
                   onClick={() => handleCardClick("/mentoring")}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Community Forum Section */}
+          {activeTab === "forum" && (
+            <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <DashboardCard
+                  title="Community Forum"
+                  description="Join discussions, share experiences, and learn from others in the community."
+                  icon={
+                    <MessageCircle className="h-8 w-8 text-primary-start" />
+                  }
+                  onClick={() => handleCardClick("/forum")}
+                />
+                <DashboardCard
+                  title="Share Your Success"
+                  description="Tell your story about how AI Career Hub helped you land your dream job."
+                  icon={<TrendingUp className="h-8 w-8 text-primary-start" />}
+                  onClick={() =>
+                    handleCardClick("/forum/create?flair=success-story")
+                  }
+                />
+                <DashboardCard
+                  title="Interview Experiences"
+                  description="Share or read about real interview experiences from other community members."
+                  icon={
+                    <MessageSquare className="h-8 w-8 text-primary-start" />
+                  }
+                  onClick={() =>
+                    handleCardClick("/forum?flair=interview-experience")
+                  }
                 />
               </div>
             </div>

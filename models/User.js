@@ -10,6 +10,36 @@ const SkillScoreSchema = z.object({
   score: z.number().min(0).max(100),
 });
 
+// New Comment Schema for forum posts
+const CommentSchema = z.object({
+  content: z.string().min(1).max(2000).trim(),
+  author: z.string(), // User ID
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+  likes: z.array(z.string()).optional(), // Array of user IDs who liked the comment
+  replies: z.array(z.lazy(() => CommentSchema)).optional(),
+});
+
+// New Post Schema for forum
+const PostSchema = z.object({
+  title: z.string().min(3).max(200).trim(),
+  content: z.string().min(10).max(10000).trim(),
+  author: z.string(), // User ID
+  flair: z.enum([
+    "career-discussion",
+    "interview-experience",
+    "salary-details",
+    "success-story",
+    "question",
+    "other",
+  ]),
+  upvotes: z.array(z.string()).optional(), // Array of user IDs who upvoted
+  downvotes: z.array(z.string()).optional(), // Array of user IDs who downvoted
+  comments: z.array(CommentSchema).optional(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+});
+
 const UserSchema = z.object({
   username: z.string().min(3).trim(),
   gender: z.enum(["male", "female", "other", "prefer not to say"]),
@@ -21,6 +51,10 @@ const UserSchema = z.object({
   skillScores: z.array(SkillScoreSchema).optional(),
   careerGuidance: z.string().max(50000).optional(), // New field for career guidance
   mailId: z.string().email().trim().toLowerCase(),
+  // New fields for forum activity tracking
+  posts: z.array(z.string()).optional(), // Array of post IDs created by the user
+  upvotedPosts: z.array(z.string()).optional(), // Array of post IDs upvoted by the user
+  downvotedPosts: z.array(z.string()).optional(), // Array of post IDs downvoted by the user
 });
 
 // Mongoose Schema
@@ -224,9 +258,127 @@ mongooseFeedbackSchema.pre("save", async function (next) {
   }
 });
 
+// New Mongoose Schema for Comments
+const mongooseCommentSchema = new Schema(
+  {
+    content: {
+      type: String,
+      required: [true, "Comment content is required"],
+      trim: true,
+      minLength: [1, "Comment must not be empty"],
+      maxLength: [2000, "Comment cannot exceed 2000 characters"],
+    },
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Comment author is required"],
+    },
+    likes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    replies: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// New Mongoose Schema for Posts
+const mongoosePostSchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: [true, "Post title is required"],
+      trim: true,
+      minLength: [3, "Title must be at least 3 characters long"],
+      maxLength: [200, "Title cannot exceed 200 characters"],
+    },
+    content: {
+      type: String,
+      required: [true, "Post content is required"],
+      trim: true,
+      minLength: [10, "Content must be at least 10 characters long"],
+      maxLength: [10000, "Content cannot exceed 10000 characters"],
+    },
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Post author is required"],
+    },
+    flair: {
+      type: String,
+      required: [true, "Post flair is required"],
+      enum: {
+        values: [
+          "career-discussion",
+          "interview-experience",
+          "salary-details",
+          "success-story",
+          "question",
+          "other",
+        ],
+        message: "{VALUE} is not a valid flair option",
+      },
+    },
+    upvotes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    downvotes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    comments: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Update the User schema to include forum activity
+mongooseUserSchema.add({
+  posts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Post",
+    },
+  ],
+  upvotedPosts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Post",
+    },
+  ],
+  downvotedPosts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Post",
+    },
+  ],
+});
+
 // Create or get existing models
 let User;
 let Feedback;
+let Post;
+let Comment;
 
 try {
   User = mongoose.model("User");
@@ -240,15 +392,31 @@ try {
   Feedback = mongoose.model("Feedback", mongooseFeedbackSchema);
 }
 
+try {
+  Post = mongoose.model("Post");
+} catch {
+  Post = mongoose.model("Post", mongoosePostSchema);
+}
+
+try {
+  Comment = mongoose.model("Comment");
+} catch {
+  Comment = mongoose.model("Comment", mongooseCommentSchema);
+}
+
 module.exports = {
   schemas: {
     SkillSchema,
     UserSchema,
     SkillScoreSchema,
     FeedbackSchema,
+    PostSchema,
+    CommentSchema,
   },
   models: {
     User,
     Feedback,
+    Post,
+    Comment,
   },
 };
