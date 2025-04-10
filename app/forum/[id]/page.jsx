@@ -14,6 +14,8 @@ import {
   Clock,
   Trash2,
   Edit,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { ProtectedRoute } from "@/services/routeProtectionService";
 import ChatbotController from "@/components/ChatbotController";
@@ -333,95 +335,139 @@ export default function PostDetail({ params }) {
   };
 
   // Recursive function to render comments and their replies
+  // Add this to your state variables at the top of the component
+  const [expandedComments, setExpandedComments] = useState({});
+
+  // Add this function to toggle comment expansion
+  const toggleCommentExpansion = (commentId) => {
+    setExpandedComments((prev) => ({
+      ...prev,
+      [commentId]: !prev[commentId],
+    }));
+  };
+
+  // Update the renderComments function to include the expander
   const renderComments = (comments, parentId = null) => {
     return comments
       .filter((comment) => comment.parentCommentId === parentId)
-      .map((comment) => (
-        <div
-          key={comment._id}
-          className={`bg-[#1F2937] p-4 rounded-lg mb-4 ${
-            parentId ? "ml-8 border-l-2 border-[#E31D65]/30" : ""
-          }`}
-        >
-          <div className="flex justify-between items-start mb-2">
-            <div className="flex items-center">
-              <div className="bg-[#0D1117] p-2 rounded-full mr-3">
-                <User className="h-5 w-5 text-[#E31D65]" />
-              </div>
-              <div>
-                <p className="text-white font-medium">
-                  {comment.author?.username || "Anonymous"}
-                </p>
-                <div className="flex items-center text-gray-400 text-sm">
-                  <Clock className="h-3 w-3 mr-1" />
-                  <span>{formatDate(comment.createdAt)}</span>
+      .map((comment) => {
+        // Check if this comment has replies
+        const hasReplies = comments.some(
+          (reply) => reply.parentCommentId === comment._id
+        );
+
+        return (
+          <div
+            key={comment._id}
+            className={`bg-[#1F2937] p-4 rounded-lg mb-4 ${
+              parentId ? "ml-8 border-l-2 border-[#E31D65]/30" : ""
+            }`}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex items-center">
+                <div className="bg-[#0D1117] p-2 rounded-full mr-3">
+                  <User className="h-5 w-5 text-[#E31D65]" />
                 </div>
+                <div>
+                  <p className="text-white font-medium">
+                    {comment.author?.username || "Anonymous"}
+                  </p>
+                  <div className="flex items-center text-gray-400 text-sm">
+                    <Clock className="h-3 w-3 mr-1" />
+                    <span>{formatDate(comment.createdAt)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Comment actions (delete button) */}
+              {(session?.user?.email === comment.author?.email || isAuthor) && (
+                <button
+                  onClick={() => handleDeleteComment(comment._id)}
+                  className="text-gray-400 hover:text-white p-1"
+                  aria-label="Delete comment"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            <p className="text-gray-300 mb-3">{comment.content}</p>
+
+            <div className="flex items-center justify-between">
+              <div className="flex gap-3">
+                <button
+                  onClick={() =>
+                    setReplyingTo(
+                      replyingTo === comment._id ? null : comment._id
+                    )
+                  }
+                  className="text-gray-400 hover:text-white text-sm flex items-center"
+                >
+                  <MessageCircle className="h-4 w-4 mr-1" />
+                  Reply
+                </button>
+
+                {/* Add expander button if comment has replies */}
+                {hasReplies && (
+                  <button
+                    onClick={() => toggleCommentExpansion(comment._id)}
+                    className="text-gray-400 hover:text-white text-sm flex items-center"
+                  >
+                    {expandedComments[comment._id] ? (
+                      <>
+                        <ChevronUp className="h-4 w-4 mr-1" />
+                        Hide Replies
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-4 w-4 mr-1" />
+                        Show Replies
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Comment actions (delete button) */}
-            {(session?.user?.email === comment.author?.email || isAuthor) && (
-              <button
-                onClick={() => handleDeleteComment(comment._id)}
-                className="text-gray-400 hover:text-white p-1"
-                aria-label="Delete comment"
+            {/* Reply form */}
+            {replyingTo === comment._id && (
+              <form
+                onSubmit={(e) => handleSubmitReply(e, comment._id)}
+                className="mt-3"
               >
-                <Trash2 className="h-4 w-4" />
-              </button>
+                <div className="flex items-center bg-[#0D1117] rounded-lg overflow-hidden">
+                  <input
+                    type="text"
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    placeholder="Write a reply..."
+                    className="flex-grow px-4 py-2 bg-transparent text-white focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubmittingComment || !replyContent.trim()}
+                    className={`px-4 py-2 ${
+                      isSubmittingComment || !replyContent.trim()
+                        ? "bg-gray-600 cursor-not-allowed"
+                        : "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
+                    } text-white`}
+                  >
+                    {isSubmittingComment ? (
+                      <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                    ) : (
+                      <Send className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </form>
             )}
+
+            {/* Render replies recursively only if expanded */}
+            {expandedComments[comment._id] &&
+              renderComments(post.comments, comment._id)}
           </div>
-
-          <p className="text-gray-300 mb-3">{comment.content}</p>
-
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() =>
-                setReplyingTo(replyingTo === comment._id ? null : comment._id)
-              }
-              className="text-gray-400 hover:text-white text-sm flex items-center"
-            >
-              <MessageCircle className="h-4 w-4 mr-1" />
-              Reply
-            </button>
-          </div>
-
-          {/* Reply form */}
-          {replyingTo === comment._id && (
-            <form
-              onSubmit={(e) => handleSubmitReply(e, comment._id)}
-              className="mt-3"
-            >
-              <div className="flex items-center bg-[#0D1117] rounded-lg overflow-hidden">
-                <input
-                  type="text"
-                  value={replyContent}
-                  onChange={(e) => setReplyContent(e.target.value)}
-                  placeholder="Write a reply..."
-                  className="flex-grow px-4 py-2 bg-transparent text-white focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={isSubmittingComment || !replyContent.trim()}
-                  className={`px-4 py-2 ${
-                    isSubmittingComment || !replyContent.trim()
-                      ? "bg-gray-600 cursor-not-allowed"
-                      : "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
-                  } text-white`}
-                >
-                  {isSubmittingComment ? (
-                    <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
-                  ) : (
-                    <Send className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* Render replies recursively */}
-          {renderComments(post.comments, comment._id)}
-        </div>
-      ));
+        );
+      });
   };
 
   return (

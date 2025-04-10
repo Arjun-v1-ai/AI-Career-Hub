@@ -17,8 +17,10 @@ import {
   ArrowRight,
   PlayCircle,
   Linkedin,
-  Trash2, // Adding the trash icon
-  MessageCircle, // Adding message circle icon for forum
+  Trash2,
+  MessageCircle,
+  Edit, // Add this import
+  PenSquare, // Alternative icon if you prefer
 } from "lucide-react";
 import { ProtectedRoute } from "@/services/routeProtectionService";
 import ChatbotController from "@/components/ChatbotController";
