@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BookOpen, Briefcase, TrendingUp, Award, Users } from "lucide-react";
 
 const CareerGuidanceDisplay = ({ guidance }) => {
@@ -47,7 +47,135 @@ const CareerGuidanceDisplay = ({ guidance }) => {
     return sections;
   };
 
+  // Extract career path information and save it to the database
+  useEffect(() => {
+    if (guidance) {
+      const extractAndSaveCareerPathInfo = async () => {
+        try {
+          const sections = parseSections(guidance);
+          const careerPathInfo = extractCareerPathInfo(sections);
+
+          // Save the extracted information to the database
+          const response = await fetch("/api/save-career-path-info", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ careerPathInfo }),
+          });
+
+          if (!response.ok) {
+            console.error("Failed to save career path information");
+          }
+        } catch (error) {
+          console.error("Error extracting career path info:", error);
+        }
+      };
+
+      extractAndSaveCareerPathInfo();
+    }
+  }, [guidance]);
+
+  // Function to extract career path information from parsed sections
+  const extractCareerPathInfo = (sections) => {
+    const careerPathInfo = {
+      currentLevel: "Entry Level", // Default value
+      nextSteps: [],
+      recommendedRoles: [],
+    };
+
+    try {
+      // Extract recommended roles from section 2
+      if (sections.careerPaths) {
+        // Look for role titles, typically in bold or as list items
+        const roleMatches = sections.careerPaths.match(
+          /[*-]\s*([\w\s-]+Developer|[\w\s-]+Engineer|[\w\s-]+Intern|[\w\s-]+Designer)/g
+        );
+        if (roleMatches) {
+          careerPathInfo.recommendedRoles = roleMatches
+            .slice(0, 4)
+            .map((role) => {
+              const title = role.replace(/[*-]\s*/, "").trim();
+              // Try to extract level, salary, and demand info
+              const levelMatch = sections.careerPaths.match(
+                new RegExp(
+                  `${title}[\\s\\S]*?Experience\\s*Level[\\s\\S]*?([\\w\\s-]+)`,
+                  "i"
+                )
+              );
+              const salaryMatch = sections.careerPaths.match(
+                new RegExp(
+                  `${title}[\\s\\S]*?Salary[\\s\\S]*?([\\$\\d,\\s\\w-]+)`,
+                  "i"
+                )
+              );
+              const demandMatch = sections.careerPaths.match(
+                new RegExp(`${title}[\\s\\S]*?Demand[\\s\\S]*?([\\w]+)`, "i")
+              );
+
+              return {
+                title,
+                level: levelMatch ? levelMatch[1].trim() : "",
+                salary: salaryMatch ? salaryMatch[1].trim() : "",
+                demand: demandMatch ? demandMatch[1].trim() : "",
+              };
+            });
+        }
+      }
+
+      // Extract career progression timeline from section 4
+      if (sections.progressionTimeline) {
+        // Extract short-term goals (1 year)
+        const shortTermSection = sections.progressionTimeline.match(
+          /Short-term\s*goals[\s\S]*?(?=Mid-term|$)/i
+        );
+        if (shortTermSection && shortTermSection[0]) {
+          const shortTermRoles = shortTermSection[0].match(
+            /[*-]\s*([\w\s]+Developer|[\w\s]+Engineer|[\w\s]+Specialist|[\w\s]+Analyst)/g
+          );
+          if (shortTermRoles && shortTermRoles.length > 0) {
+            careerPathInfo.nextSteps = shortTermRoles
+              .slice(0, 2)
+              .map((role) => role.replace(/[*-]\s*/, "").trim());
+          }
+        }
+
+        // Try to determine current level from context
+        if (
+          sections.progressionTimeline.toLowerCase().includes("junior") ||
+          sections.progressionTimeline.toLowerCase().includes("entry")
+        ) {
+          careerPathInfo.currentLevel = "Entry Level";
+        } else if (
+          sections.progressionTimeline.toLowerCase().includes("mid") ||
+          sections.progressionTimeline.toLowerCase().includes("intermediate")
+        ) {
+          careerPathInfo.currentLevel = "Mid-Level";
+        } else if (
+          sections.progressionTimeline.toLowerCase().includes("senior")
+        ) {
+          careerPathInfo.currentLevel = "Senior";
+        }
+      }
+
+      return careerPathInfo;
+    } catch (error) {
+      console.error("Error extracting career path info:", error);
+      return careerPathInfo; // Return default values on error
+    }
+  };
+
   const sections = parseSections(guidance);
+
+  // Convert markdown-style formatting to HTML
+  const formatText = (text) => {
+    if (!text) return "";
+    return text
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.*?)\*/g, "<em>$1</em>")
+      .replace(/\n/g, "<br>")
+      .replace(/\|/g, " | "); // Add spaces around table separators
+  };
 
   return (
     <div className="bg-[#161B22] rounded-lg border border-orange-600 overflow-hidden">
@@ -70,11 +198,12 @@ const CareerGuidanceDisplay = ({ guidance }) => {
             {sections.careerProfile && (
               <div
                 dangerouslySetInnerHTML={{
-                  __html: sections.careerProfile
-                    .replace(/1\.\s*Career\s*Profile\s*Analysis/i, "")
-                    .replace(/\n/g, "<br>")
-                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                    .replace(/\*(.*?)\*/g, "<em>$1</em>"),
+                  __html: formatText(
+                    sections.careerProfile.replace(
+                      /1\.\s*Career\s*Profile\s*Analysis/i,
+                      ""
+                    )
+                  ),
                 }}
               />
             )}
@@ -90,11 +219,12 @@ const CareerGuidanceDisplay = ({ guidance }) => {
             {sections.careerPaths && (
               <div
                 dangerouslySetInnerHTML={{
-                  __html: sections.careerPaths
-                    .replace(/2\.\s*Recommended\s*Career\s*Paths/i, "")
-                    .replace(/\n/g, "<br>")
-                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                    .replace(/\*(.*?)\*/g, "<em>$1</em>"),
+                  __html: formatText(
+                    sections.careerPaths.replace(
+                      /2\.\s*Recommended\s*Career\s*Paths/i,
+                      ""
+                    )
+                  ),
                 }}
               />
             )}
@@ -112,11 +242,12 @@ const CareerGuidanceDisplay = ({ guidance }) => {
             {sections.skillDevelopment && (
               <div
                 dangerouslySetInnerHTML={{
-                  __html: sections.skillDevelopment
-                    .replace(/3\.\s*Skill\s*Development\s*Roadmap/i, "")
-                    .replace(/\n/g, "<br>")
-                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                    .replace(/\*(.*?)\*/g, "<em>$1</em>"),
+                  __html: formatText(
+                    sections.skillDevelopment.replace(
+                      /3\.\s*Skill\s*Development\s*Roadmap/i,
+                      ""
+                    )
+                  ),
                 }}
               />
             )}
@@ -136,11 +267,12 @@ const CareerGuidanceDisplay = ({ guidance }) => {
             {sections.progressionTimeline && (
               <div
                 dangerouslySetInnerHTML={{
-                  __html: sections.progressionTimeline
-                    .replace(/4\.\s*Career\s*Progression\s*Timeline/i, "")
-                    .replace(/\n/g, "<br>")
-                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                    .replace(/\*(.*?)\*/g, "<em>$1</em>"),
+                  __html: formatText(
+                    sections.progressionTimeline.replace(
+                      /4\.\s*Career\s*Progression\s*Timeline/i,
+                      ""
+                    )
+                  ),
                 }}
               />
             )}
@@ -160,11 +292,12 @@ const CareerGuidanceDisplay = ({ guidance }) => {
             {sections.additionalRecommendations && (
               <div
                 dangerouslySetInnerHTML={{
-                  __html: sections.additionalRecommendations
-                    .replace(/5\.\s*Additional\s*Recommendations/i, "")
-                    .replace(/\n/g, "<br>")
-                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                    .replace(/\*(.*?)\*/g, "<em>$1</em>"),
+                  __html: formatText(
+                    sections.additionalRecommendations.replace(
+                      /5\.\s*Additional\s*Recommendations/i,
+                      ""
+                    )
+                  ),
                 }}
               />
             )}
