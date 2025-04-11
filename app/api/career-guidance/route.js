@@ -9,6 +9,99 @@ const { User } = models;
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
+// Helper function to extract career path information from guidance text
+function extractCareerPathInfo(guidanceText) {
+  const careerPathInfo = {
+    currentLevel: "Entry Level", // Default value
+    nextSteps: [],
+    recommendedRoles: [],
+  };
+
+  try {
+    // Extract recommended roles from section 2
+    const careerPathsSection = guidanceText.match(
+      /2\.\s*Recommended\s*Career\s*Paths[\s\S]*?(?=3\.|$)/i
+    );
+    if (careerPathsSection && careerPathsSection[0]) {
+      // Look for role titles, typically in bold or as list items
+      const roleMatches = careerPathsSection[0].match(
+        /[*-]\s*([\w\s]+)(?::|Developer|Engineer|Architect|Designer|Manager|Specialist)/g
+      );
+      if (roleMatches) {
+        careerPathInfo.recommendedRoles = roleMatches
+          .slice(0, 4)
+          .map((role) => {
+            const title = role.replace(/[*-]\s*/, "").trim();
+            // Try to extract level, salary, and demand info
+            const levelMatch = careerPathsSection[0].match(
+              new RegExp(
+                `${title}[\\s\\S]*?experience\\s*level[\\s\\S]*?([\\w\\s-]+)`,
+                "i"
+              )
+            );
+            const salaryMatch = careerPathsSection[0].match(
+              new RegExp(
+                `${title}[\\s\\S]*?salary[\\s\\S]*?([\\$\\d,\\s\\w-]+)`,
+                "i"
+              )
+            );
+            const demandMatch = careerPathsSection[0].match(
+              new RegExp(`${title}[\\s\\S]*?demand[\\s\\S]*?([\\w]+)`, "i")
+            );
+
+            return {
+              title,
+              level: levelMatch ? levelMatch[1].trim() : "",
+              salary: salaryMatch ? salaryMatch[1].trim() : "",
+              demand: demandMatch ? demandMatch[1].trim() : "",
+            };
+          });
+      }
+    }
+
+    // Extract career progression timeline from section 4
+    const timelineSection = guidanceText.match(
+      /4\.\s*Career\s*Progression\s*Timeline[\s\S]*?(?=5\.|$)/i
+    );
+    if (timelineSection && timelineSection[0]) {
+      // Extract short-term goals (1 year)
+      const shortTermSection = timelineSection[0].match(
+        /Short-term\s*goals[\s\S]*?(?=Mid-term|$)/i
+      );
+      if (shortTermSection && shortTermSection[0]) {
+        const shortTermRoles = shortTermSection[0].match(
+          /[*-]\s*([\w\s]+Developer|[\w\s]+Engineer|[\w\s]+Specialist|[\w\s]+Analyst)/g
+        );
+        if (shortTermRoles && shortTermRoles.length > 0) {
+          careerPathInfo.nextSteps = shortTermRoles
+            .slice(0, 2)
+            .map((role) => role.replace(/[*-]\s*/, "").trim());
+        }
+      }
+
+      // Try to determine current level from context
+      if (
+        timelineSection[0].toLowerCase().includes("junior") ||
+        timelineSection[0].toLowerCase().includes("entry")
+      ) {
+        careerPathInfo.currentLevel = "Entry Level";
+      } else if (
+        timelineSection[0].toLowerCase().includes("mid") ||
+        timelineSection[0].toLowerCase().includes("intermediate")
+      ) {
+        careerPathInfo.currentLevel = "Mid-Level";
+      } else if (timelineSection[0].toLowerCase().includes("senior")) {
+        careerPathInfo.currentLevel = "Senior";
+      }
+    }
+
+    return careerPathInfo;
+  } catch (error) {
+    console.error("Error extracting career path info:", error);
+    return careerPathInfo; // Return default values on error
+  }
+}
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -117,9 +210,13 @@ Please provide detailed, actionable insights that take into account the individu
     const result = await model.generateContent(prompt);
     const guidance = result.response.text();
 
-    // Save guidance to database
+    // Extract career path information
+    const careerPathInfo = extractCareerPathInfo(guidance);
+
+    // Save guidance and career path info to database
     try {
       user.careerGuidance = guidance;
+      user.careerPathInfo = careerPathInfo;
       await user.save();
     } catch (saveError) {
       console.error("Error saving to database:", saveError);

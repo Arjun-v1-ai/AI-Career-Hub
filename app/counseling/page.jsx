@@ -5,6 +5,7 @@ import { ProtectedRoute } from "@/services/routeProtectionService";
 import ChatbotController from "@/components/ChatbotController";
 import { useRouter } from "next/navigation";
 import CareerGuidanceDisplay from "@/components/CareerGuidanceDisplay";
+import { BookOpen, Briefcase, TrendingUp, Award, Users } from "lucide-react";
 
 function CareerGuidance() {
   const router = useRouter();

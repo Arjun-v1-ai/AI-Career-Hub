@@ -37,6 +37,9 @@ export default function Profile() {
           }
 
           // Transform the data to match your profile structure
+          // In the profile page, add a new section to display when career guidance is not available
+
+          // Inside the useEffect where you fetch user profile, update the transformedProfile:
           const transformedProfile = {
             id: data._id,
             username: data.username,
@@ -62,15 +65,19 @@ export default function Profile() {
               };
             }),
             careerPath: {
-              current: "Entry Level",
-              next: ["Junior", "Mid-Level"],
-              recommended: [
+              current: data.careerPathInfo?.currentLevel || "Entry Level",
+              next: data.careerPathInfo?.nextSteps || ["Junior", "Mid-Level"],
+              recommended: data.careerPathInfo?.recommendedRoles?.map(
+                (role) => role.title
+              ) || [
                 "Full Stack Developer",
                 "DevOps Engineer",
                 "Technical Architect",
                 "Engineering Manager",
               ],
+              roleDetails: data.careerPathInfo?.recommendedRoles || [],
             },
+            hasCareerGuidance: data.hasCareerGuidance,
           };
 
           setProfile(transformedProfile);
@@ -93,8 +100,6 @@ export default function Profile() {
     }
   };
 
-  
-  
   // Then replace the loading state (around line 76-80)
   if (status === "loading" || loading) {
     return <Loader message="Loading your profile" />;
@@ -209,34 +214,101 @@ export default function Profile() {
                 <h3 className="text-white font-medium mb-2">Current Level</h3>
                 <p className="text-gray-400">{profile.careerPath.current}</p>
               </div>
+
+              {/* Next Steps with Timeline Visualization */}
               <div className="p-4 bg-[#21262D] rounded-lg">
-                <h3 className="text-white font-medium mb-2">Next Steps</h3>
-                <div className="space-y-2">
-                  {profile.careerPath.next.map((level, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center text-gray-400"
-                    >
-                      <ChevronRight className="w-4 h-4 mr-2" />
-                      {level}
+                <h3 className="text-white font-medium mb-4">
+                  Career Progression
+                </h3>
+                <div className="relative">
+                  {/* Timeline line */}
+                  <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#E31D65] to-[#FF6B2B]"></div>
+
+                  {/* Current Level */}
+                  <div className="relative pl-12 pb-8">
+                    <div className="absolute left-2 w-6 h-6 rounded-full bg-[#E31D65] border-4 border-[#21262D] z-10"></div>
+                    <div className="text-white font-medium">Now</div>
+                    <div className="text-gray-400">
+                      {profile.careerPath.current}
+                    </div>
+                  </div>
+
+                  {/* Next Steps */}
+                  {profile.careerPath.next.map((step, index) => (
+                    <div key={index} className="relative pl-12 pb-8">
+                      <div className="absolute left-2 w-6 h-6 rounded-full bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] border-4 border-[#21262D] z-10"></div>
+                      <div className="text-white font-medium">
+                        {index === 0 ? "1-2 Years" : "3-5 Years"}
+                      </div>
+                      <div className="text-gray-400">{step}</div>
                     </div>
                   ))}
                 </div>
               </div>
+
+              {/* Recommended Roles with Details */}
               <div className="p-4 bg-[#21262D] rounded-lg">
-                <h3 className="text-white font-medium mb-2">
+                <h3 className="text-white font-medium mb-4">
                   Recommended Roles
                 </h3>
-                <div className="space-y-2">
-                  {profile.careerPath.recommended.map((role, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center text-gray-400"
-                    >
-                      <ChevronRight className="w-4 h-4 mr-2" />
-                      {role}
-                    </div>
-                  ))}
+                <div className="space-y-4">
+                  {profile.careerPath.roleDetails &&
+                  profile.careerPath.roleDetails.length > 0
+                    ? profile.careerPath.roleDetails.map((role, index) => (
+                        <div
+                          key={index}
+                          className="p-3 bg-[#161B22] rounded-lg border border-[#30363D]"
+                        >
+                          <h4 className="text-white font-medium">
+                            {role.title}
+                          </h4>
+                          <div className="grid grid-cols-3 gap-2 mt-2 text-sm">
+                            {role.level && (
+                              <div>
+                                <span className="text-gray-500">Level:</span>
+                                <span className="text-gray-300 ml-1">
+                                  {role.level}
+                                </span>
+                              </div>
+                            )}
+                            {role.salary && (
+                              <div>
+                                <span className="text-gray-500">Salary:</span>
+                                <span className="text-gray-300 ml-1">
+                                  {role.salary}
+                                </span>
+                              </div>
+                            )}
+                            {role.demand && (
+                              <div>
+                                <span className="text-gray-500">Demand:</span>
+                                <span
+                                  className={`ml-1 ${
+                                    role.demand.toLowerCase().includes("high")
+                                      ? "text-green-400"
+                                      : role.demand
+                                          .toLowerCase()
+                                          .includes("medium")
+                                      ? "text-yellow-400"
+                                      : "text-gray-400"
+                                  }`}
+                                >
+                                  {role.demand}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    : profile.careerPath.recommended.map((role, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center text-gray-400"
+                        >
+                          <ChevronRight className="w-4 h-4 mr-2" />
+                          {role}
+                        </div>
+                      ))}
                 </div>
               </div>
             </div>

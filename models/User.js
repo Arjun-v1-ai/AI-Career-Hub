@@ -40,6 +40,7 @@ const PostSchema = z.object({
   updatedAt: z.date().optional(),
 });
 
+// Update the UserSchema to include career path information
 const UserSchema = z.object({
   username: z.string().min(3).trim(),
   gender: z.enum(["male", "female", "other", "prefer not to say"]),
@@ -50,6 +51,22 @@ const UserSchema = z.object({
   skills: z.array(SkillSchema).optional(),
   skillScores: z.array(SkillScoreSchema).optional(),
   careerGuidance: z.string().max(50000).optional(), // New field for career guidance
+  careerPathInfo: z
+    .object({
+      currentLevel: z.string().optional(),
+      nextSteps: z.array(z.string()).optional(),
+      recommendedRoles: z
+        .array(
+          z.object({
+            title: z.string(),
+            level: z.string().optional(),
+            salary: z.string().optional(),
+            demand: z.string().optional(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
   mailId: z.string().email().trim().toLowerCase(),
   // New fields for forum activity tracking
   posts: z.array(z.string()).optional(), // Array of post IDs created by the user
@@ -135,6 +152,18 @@ const mongooseUserSchema = new Schema(
       match: [
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
         "Please enter a valid email address",
+      ],
+    },
+    careerPathInfo: {
+      currentLevel: String,
+      nextSteps: [String],
+      recommendedRoles: [
+        {
+          title: String,
+          level: String,
+          salary: String,
+          demand: String,
+        },
       ],
     },
   },
