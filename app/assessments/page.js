@@ -269,7 +269,7 @@ const ProctoredSkillTest = () => {
         throw new Error("Failed to update skill score");
       }
 
-      window.location.href = "/profile";
+      window.location.href = "/dashboard";
     } catch (error) {
       console.error("Error saving test results:", error);
       setWarning("Failed to save test results. Please try again.");
@@ -329,8 +329,6 @@ const ProctoredSkillTest = () => {
     return <Loader message={`Preparing your ${skill} assessment`} />;
   }
 
-  
-
   // Error state
   if (error) {
     return (
@@ -341,7 +339,7 @@ const ProctoredSkillTest = () => {
             onClick={handleBackToProfile}
             className="px-4 py-2 bg-[#30363D] text-white rounded-lg hover:opacity-90"
           >
-            Back to Profile
+            Back to Dashboard
           </button>
         </div>
       </div>
