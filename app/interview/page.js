@@ -247,13 +247,12 @@ const Interview = () => {
   };
 
   const handleBackToProfile = () => {
-    window.location.href = "/profile";
+    window.location.href = "/dashboard";
   };
 
   // Loading state
   // Import the Loader component
- 
-  
+
   // Then in your component where you check for loading:
   if (loading) {
     return <Loader message="Preparing your interview" />;
@@ -269,7 +268,7 @@ const Interview = () => {
             onClick={handleBackToProfile}
             className="px-4 py-2 bg-[#30363D] text-white rounded-lg hover:opacity-90"
           >
-            Back to Profile
+            Back to Dashboard
           </button>
         </div>
       </div>
@@ -288,7 +287,7 @@ const Interview = () => {
             onClick={handleBackToProfile}
             className="px-4 py-2 bg-[#30363D] text-white rounded-lg hover:opacity-90"
           >
-            Back to Profile
+            Back to Dashboard
           </button>
         </div>
       </div>
@@ -382,7 +381,7 @@ const Interview = () => {
               onClick={handleBackToProfile}
               className="flex-1 px-4 py-2 bg-[#30363D] hover:opacity-90 text-white rounded-lg"
             >
-              Back to Profile
+              Back to Dashboard
             </button>
           </div>
 
