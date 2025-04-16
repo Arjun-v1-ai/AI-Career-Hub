@@ -11,16 +11,13 @@ const BotpressChatbot = () => {
     return pathname?.includes('/assessments') || searchParams?.has('skill');
   };
 
+  // Don't render anything at all if it's an assessment page
+  if (isAssessmentPage()) return null;
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    if (isAssessmentPage()) {
-      if (window.botpressWebChat) {
-        window.botpressWebChat.sendEvent({ type: 'hide' });
-      }
-      return;
-    }
-
+    // Prevent script reinjection
     if (!window.botpressWebChat && !isScriptsLoaded) {
       const injectScript = document.createElement('script');
       injectScript.src = 'https://cdn.botpress.cloud/webchat/v2.2/inject.js';
