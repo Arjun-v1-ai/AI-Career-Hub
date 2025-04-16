@@ -51,6 +51,27 @@ const ProctoredSkillTest = () => {
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   // Load questions
+  // useEffect(() => {
+  //   const loadQuestions = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const fetchedQuestions = await QuestionService.fetchQuestions(skill);
+  //       setQuestions(fetchedQuestions);
+  //     } catch (error) {
+  //       setError(error.message);
+  //       console.error("Failed to load questions:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   if (skill) {
+  //     loadQuestions();
+  //   }
+  // }, [skill]);
+
+
+
+  // Load questions
   useEffect(() => {
     const loadQuestions = async () => {
       try {
@@ -69,6 +90,7 @@ const ProctoredSkillTest = () => {
       loadQuestions();
     }
   }, [skill]);
+
 
   // Proctoring video effect
   useEffect(() => {
