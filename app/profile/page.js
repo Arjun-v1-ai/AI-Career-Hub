@@ -204,7 +204,7 @@ export default function Profile() {
           </div>
 
           {/* Career Path Card */}
-          <div className="bg-[#161B22] border border-[#30363D] rounded-lg p-6">
+          {/* <div className="bg-[#161B22] border border-[#30363D] rounded-lg p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white">Career Path</h2>
               <Briefcase className="w-6 h-6 text-blue-500" />
@@ -215,16 +215,14 @@ export default function Profile() {
                 <p className="text-gray-400">{profile.careerPath.current}</p>
               </div>
 
-              {/* Next Steps with Timeline Visualization */}
               <div className="p-4 bg-[#21262D] rounded-lg">
                 <h3 className="text-white font-medium mb-4">
                   Career Progression
                 </h3>
                 <div className="relative">
-                  {/* Timeline line */}
                   <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#E31D65] to-[#FF6B2B]"></div>
 
-                  {/* Current Level */}
+                  
                   <div className="relative pl-12 pb-8">
                     <div className="absolute left-2 w-6 h-6 rounded-full bg-[#E31D65] border-4 border-[#21262D] z-10"></div>
                     <div className="text-white font-medium">Now</div>
@@ -233,7 +231,6 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  {/* Next Steps */}
                   {profile.careerPath.next.map((step, index) => (
                     <div key={index} className="relative pl-12 pb-8">
                       <div className="absolute left-2 w-6 h-6 rounded-full bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] border-4 border-[#21262D] z-10"></div>
@@ -246,7 +243,6 @@ export default function Profile() {
                 </div>
               </div>
 
-              {/* Recommended Roles with Details */}
               <div className="p-4 bg-[#21262D] rounded-lg">
                 <h3 className="text-white font-medium mb-4">
                   Recommended Roles
@@ -312,7 +308,7 @@ export default function Profile() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
         <ChatbotController />
       </main>
