@@ -22,6 +22,24 @@ const ProctoredSkillTest = () => {
   const searchParams = useSearchParams();
   const skill = searchParams.get("skill");
 
+  // Hard reload effect - add this at the top with other effects
+  useEffect(() => {
+    // Check if this is the first load after navigation (not a refresh)
+    const isFirstLoad = sessionStorage.getItem('assessmentPageLoaded') !== 'true';
+    
+    if (isFirstLoad && skill) {
+      // Set the flag to prevent infinite reloads
+      sessionStorage.setItem('assessmentPageLoaded', 'true');
+      // Perform a hard reload
+      window.location.reload();
+    }
+    
+    // Clean up function to reset the flag when leaving the page
+    return () => {
+      sessionStorage.removeItem('assessmentPageLoaded');
+    };
+  }, [skill]);
+
   // Proctoring states
   const [isTestStarted, setIsTestStarted] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -51,27 +69,6 @@ const ProctoredSkillTest = () => {
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   // Load questions
-  // useEffect(() => {
-  //   const loadQuestions = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const fetchedQuestions = await QuestionService.fetchQuestions(skill);
-  //       setQuestions(fetchedQuestions);
-  //     } catch (error) {
-  //       setError(error.message);
-  //       console.error("Failed to load questions:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   if (skill) {
-  //     loadQuestions();
-  //   }
-  // }, [skill]);
-
-
-
-  // Load questions
   useEffect(() => {
     const loadQuestions = async () => {
       try {
@@ -90,7 +87,6 @@ const ProctoredSkillTest = () => {
       loadQuestions();
     }
   }, [skill]);
-
 
   // Proctoring video effect
   useEffect(() => {
