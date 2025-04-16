@@ -358,7 +358,7 @@ const ProctoredSkillTest = () => {
             onClick={handleBackToProfile}
             className="px-4 py-2 bg-[#30363D] text-white rounded-lg hover:opacity-90"
           >
-            Back to Profile
+            Back to Dashboard
           </button>
         </div>
       </div>
@@ -507,7 +507,7 @@ const ProctoredSkillTest = () => {
                   : "bg-[#30363D] hover:opacity-90"
               } text-white rounded-lg`}
             >
-              Back to Profile
+              Back to Dashboard
             </button>
           </div>
 
