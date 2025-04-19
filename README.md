@@ -1,3 +1,5 @@
+Jeet Gaye 🎉💪
+
 # AI Career Hub
 
 A comprehensive career guidance platform with AI-powered features including video proctoring, resume analysis, and career counseling.
