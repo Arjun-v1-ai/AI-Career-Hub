@@ -1,4 +1,4 @@
-Jeet Gaye 🎉💪 wooohooo
+Jeet Gaye Amdocs GenAI Hackathon 🎉💪 wooohooo
 
 # AI Career Hub
 
