@@ -84,7 +84,7 @@ export async function POST(request) {
     await waitForFilesActive([uploadedFile]);
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-3-flash-preview",
       systemInstruction: `I will give you a resume and a job description. Compare the resume against the job description and
       provide the following in markdown format:
       - A single number score out of 10 (show how much out of 10 eg. 8/10)

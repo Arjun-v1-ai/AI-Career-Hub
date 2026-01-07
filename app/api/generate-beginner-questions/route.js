@@ -42,7 +42,7 @@ export async function GET(request) {
     }
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-3-flash-preview",
       systemInstruction: `You are a career assessment expert who creates thoughtful, insightful questions to help people discover their career paths. Always return valid JSON with no additional text or markdown formatting. Do not wrap your response in code blocks.`,
     });
 

@@ -57,7 +57,7 @@ async function waitForFilesActive(files) {
 async function extractResumeInfo(resumeFile) {
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-3-flash-preview",
     });
 
     const prompt = `Extract the following information from this resume:
@@ -201,7 +201,7 @@ export async function POST(request) {
     }
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-3-flash-preview",
       systemInstruction: systemInstruction,
     });
 

@@ -206,7 +206,7 @@ Please provide detailed, actionable insights that take into account the individu
 
     // Get Gemini model and generate response
     // const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
     const result = await model.generateContent(prompt);
     const guidance = result.response.text();
 

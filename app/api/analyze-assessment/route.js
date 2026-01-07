@@ -54,7 +54,7 @@ ${responsesByCategory[category]
 `;
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-3-flash-preview",
       systemInstruction: `You are a career assessment AI specializing in balanced, non-prescriptive career guidance.
 
 Based on assessment responses, generate a detailed career assessment report with the following structure:

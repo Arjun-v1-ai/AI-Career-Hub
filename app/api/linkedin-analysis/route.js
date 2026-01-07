@@ -74,7 +74,7 @@ export async function POST(request) {
     await waitForFilesActive([uploadedFile]);
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-3-flash-preview",
       systemInstruction: `You are a career advisor analyzing a LinkedIn profile in PDF format. Your task is to provide constructive feedback on how to improve the profile to make it more effective.
       Analyze the following LinkedIn profile and provide a detailed critique, covering these areas:
       
